@@ -1,4 +1,4 @@
-# Case Test Creator - Automação de Cenários de Teste com IA e Integração Zephyr Scale
+# Test Case Creator - Automação de Cenários de Teste com IA e Integração Zephyr Scale
 
 Este projeto automatiza a criação de cenários de teste no Zephyr Scale a partir da descrição de histórias do Jira, utilizando inteligência artificial (Gemini) para geração dos cenários.
 
