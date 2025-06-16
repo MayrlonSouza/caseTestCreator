@@ -18,6 +18,23 @@ const ZEPHYR_BASE_URL = process.env.ZEPHYR_BASE_URL;
 // Config Gemini
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
+
+// Função para buscar o ID da pasta pelo nome
+async function getFolderIdByName(folderName) {
+    const response = await axios.get(
+        `${ZEPHYR_BASE_URL}/folders?projectKey=${ZEPHYR_PROJECT_KEY}&maxResults=1000`,
+        {
+            headers: {
+                'Authorization': `Bearer ${ZEPHYR_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+    const folder = response.data.values.find(f => f.name === folderName);
+    if (!folder) throw new Error(`Pasta "${folderName}" não encontrada no Zephyr Scale.`);
+    return folder.id;
+}
+
 // Busca descrição da issue no Jira
 async function getJiraDescription(issueKey) {
     const response = await axios.get(
@@ -69,7 +86,7 @@ ${description}
 }
 
 // Cria cenário no Zephyr Scale
-async function createZephyrTestCase(title, description) {
+async function createZephyrTestCase(title, description, folderId) {
     const response = await axios.post(
         `${ZEPHYR_BASE_URL}/testcases`,
         {
@@ -77,6 +94,7 @@ async function createZephyrTestCase(title, description) {
             projectKey: ZEPHYR_PROJECT_KEY,
             objective: description,
             status: "Draft",
+            folderId: folderId,
             customFields: {
                 "Might be automated": "Yes",
                 "Product": "Issuing",
@@ -96,10 +114,16 @@ async function createZephyrTestCase(title, description) {
 // Fluxo principal
 (async () => {
     if (!ISSUE_KEY) {
-        console.error('Passe a chave da issue como argumento. Ex: node scripts/jiraToZephyrWithGemini.js PROJ-123');
+        console.error('Passe a chave da issue como argumento. Ex: node scripts/jiraToZephyrWithGemini.js PROJ-123 "Nome da Pasta"');
+        process.exit(1);
+    }
+    const folderName = process.argv[3];
+    if (!folderName) {
+        console.error('Passe o nome da pasta como argumento. Ex: node scripts/jiraToZephyrWithGemini.js PROJ-123 "Nome da Pasta"');
         process.exit(1);
     }
     try {
+        const folderId = await getFolderIdByName(folderName);
         const description = await getJiraDescription(ISSUE_KEY);
         if (!description) {
             console.error('Descrição não encontrada.');
@@ -111,7 +135,7 @@ async function createZephyrTestCase(title, description) {
             return;
         }
         for (const scenario of scenarios) {
-            await createZephyrTestCase(scenario, description);
+            await createZephyrTestCase(scenario, description, folderId);
         }
     } catch (err) {
         console.error('Erro:', err.response?.data || err.message);

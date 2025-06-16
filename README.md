@@ -36,19 +36,20 @@ Este projeto automatiza a criação de cenários de teste no Zephyr Scale a part
 
 ## Como executar o script
 
-Execute o script passando a chave da issue do Jira como argumento:
+Execute o script passando a chave da issue do Jira **e o nome da pasta do Zephyr Scale** como argumentos:
 
 ```sh
-node scripts/jiraToZephyrWithGemini.js PROJ-123
+node scripts/jiraToZephyrWithGemini.js PROJ-123 "Nome da Pasta"
 ```
 
 - Substitua `PROJ-123` pela chave da história que deseja importar.
+- Substitua `"Nome da Pasta"` pelo nome exato da pasta onde os casos de teste serão criados no Zephyr Scale.
 - O script irá:
   1. Buscar a descrição da história no Jira.
   2. Gerar cenários de teste com IA (Gemini).
-  3. Criar cada cenário no Zephyr Scale.
+  3. Criar cada cenário no Zephyr Scale na pasta informada.
 
 ## Observações
 
 - Certifique-se de que sua conta tem permissão para acessar as APIs do Jira, Zephyr Scale e Gemini.
-- O script pode ser adaptado para outros fluxos conforme sua necessidade.
+- O script pode ser adaptado para outros
