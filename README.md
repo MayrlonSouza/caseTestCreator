@@ -2,6 +2,16 @@
 
 Este projeto automatiza a criação de cenários de teste no Zephyr Scale a partir da descrição de histórias do Jira, utilizando inteligência artificial (Gemini) para geração dos cenários. Todos os cenários criados são comentados automaticamente na issue do Jira, com links diretos para cada caso de teste no Zephyr Scale.
 
+## Estrutura do Projeto
+
+```
+scripts/
+  app.js                # Fluxo principal da aplicação
+  jira.js               # Funções para integração com o Jira
+  zephyr.js             # Funções para integração com o Zephyr Scale
+  gemini.js             # Função para integração com a IA Gemini
+```
+
 ## Pré-requisitos
 
 - Node.js 18+
@@ -39,7 +49,7 @@ Este projeto automatiza a criação de cenários de teste no Zephyr Scale a part
 Execute o script passando apenas a chave da issue do Jira como argumento:
 
 ```sh
-node scripts/jiraToZephyrWithGemini.js PROJ-123
+node scripts/app.js PROJ-123
 ```
 
 - Substitua `PROJ-123` pela chave da história que deseja importar.
@@ -54,4 +64,4 @@ node scripts/jiraToZephyrWithGemini.js PROJ-123
 
 - Certifique-se de que sua conta tem permissão para acessar as APIs do Jira, Zephyr Scale e Gemini.
 - O comentário na issue do Jira é formatado e contém links clicáveis para cada caso de teste criado.
-- O script pode ser adaptado para outros fluxos conforme a sua preferência
+- O script pode ser adaptado para outros fluxos conforme sua necessidade.
