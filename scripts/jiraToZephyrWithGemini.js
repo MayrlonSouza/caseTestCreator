@@ -19,10 +19,15 @@ const ZEPHYR_BASE_URL = process.env.ZEPHYR_BASE_URL;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 
-// Função para buscar o ID da pasta pelo nome
-async function getFolderIdByName(folderName) {
-    const response = await axios.get(
-        `${ZEPHYR_BASE_URL}/folders?projectKey=${ZEPHYR_PROJECT_KEY}&maxResults=1000`,
+// Cria uma nova pasta no Zephyr Scale
+async function createZephyrFolder(folderName) {
+    const response = await axios.post(
+        `${ZEPHYR_BASE_URL}/folders`,
+        {
+            name: folderName,
+            projectKey: ZEPHYR_PROJECT_KEY,
+            folderType: "TEST_CASE"
+        },
         {
             headers: {
                 'Authorization': `Bearer ${ZEPHYR_TOKEN}`,
@@ -30,9 +35,7 @@ async function getFolderIdByName(folderName) {
             }
         }
     );
-    const folder = response.data.values.find(f => f.name === folderName);
-    if (!folder) throw new Error(`Pasta "${folderName}" não encontrada no Zephyr Scale.`);
-    return folder.id;
+    return response.data.id;
 }
 
 // Busca descrição da issue no Jira
@@ -114,16 +117,15 @@ async function createZephyrTestCase(title, description, folderId) {
 // Fluxo principal
 (async () => {
     if (!ISSUE_KEY) {
-        console.error('Passe a chave da issue como argumento. Ex: node scripts/jiraToZephyrWithGemini.js PROJ-123 "Nome da Pasta"');
+        console.error('Passe a chave da issue como argumento. Ex: node scripts/jiraToZephyrWithGemini.js PROJ-123');
         process.exit(1);
     }
-    const folderName = process.argv[3];
-    if (!folderName) {
-        console.error('Passe o nome da pasta como argumento. Ex: node scripts/jiraToZephyrWithGemini.js PROJ-123 "Nome da Pasta"');
-        process.exit(1);
-    }
+    // Gera o nome da pasta automaticamente
+    const folderName = `${ISSUE_KEY} - Test Cases`;
+
     try {
-        const folderId = await getFolderIdByName(folderName);
+        // Cria a pasta no Zephyr Scale
+        const folderId = await createZephyrFolder(folderName);
         const description = await getJiraDescription(ISSUE_KEY);
         if (!description) {
             console.error('Descrição não encontrada.');
