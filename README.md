@@ -1,6 +1,6 @@
 # Test Case Creator - Automação de Cenários de Teste com IA e Integração Zephyr Scale
 
-Este projeto automatiza a criação de cenários de teste no Zephyr Scale a partir da descrição de histórias do Jira, utilizando inteligência artificial (Gemini) para geração dos cenários.
+Este projeto automatiza a criação de cenários de teste no Zephyr Scale a partir da descrição de histórias do Jira, utilizando inteligência artificial (Gemini) para geração dos cenários. Todos os cenários criados são comentados automaticamente na issue do Jira, com links diretos para cada caso de teste no Zephyr Scale.
 
 ## Pré-requisitos
 
@@ -48,9 +48,10 @@ node scripts/jiraToZephyrWithGemini.js PROJ-123
   2. Gerar cenários de teste com IA (Gemini).
   3. Criar automaticamente uma nova pasta no Zephyr Scale chamada `PROJ-123 - Test Cases`.
   4. Criar cada cenário de teste dentro dessa nova pasta.
+  5. Adicionar um único comentário na issue do Jira, listando todos os cenários criados, cada um com link direto para o caso de teste no Zephyr Scale.
 
 ## Observações
 
 - Certifique-se de que sua conta tem permissão para acessar as APIs do Jira, Zephyr Scale e Gemini.
-- O script sempre cria uma nova pasta no Zephyr Scale com o nome `[CHAVE-DA-ISSUE] - Test Cases`.
-- O script pode ser adaptado para outros fluxos conforme sua necessidade.
+- O comentário na issue do Jira é formatado e contém links clicáveis para cada caso de teste criado.
+- O script pode ser adaptado para outros fluxos conforme a sua preferência

@@ -112,6 +112,56 @@ async function createZephyrTestCase(title, description, folderId) {
         }
     );
     console.log(`Cenário criado: ${response.data.key}`);
+    return response.data;
+}
+
+// Adiciona um comentário na issue do Jira
+async function addCommentToJiraIssue(issueKey, testCases) {
+    // testCases: array de objetos { key, scenario }
+    const content = [
+        {
+            type: "paragraph",
+            content: [
+                { type: "text", text: "Cenários de teste criados automaticamente no Zephyr Scale:" }
+            ]
+        },
+        ...testCases.map(tc => ({
+            type: "paragraph",
+            content: [
+                {
+                    type: "text",
+                    text: `${tc.key}: `
+                },
+                {
+                    type: "text",
+                    text: tc.scenario,
+                    marks: [
+                        {
+                            type: "link",
+                            attrs: {
+                                href: `${JIRA_BASE_URL}projects/${ZEPHYR_PROJECT_KEY}?selectedItem=com.atlassian.plugins.atlassian-connect-plugin:com.kanoah.test-manager__main-project-page#!/v2/testCase/${tc.key}`
+                            }
+                        }
+                    ]
+                }
+            ]
+        }))
+    ];
+
+    await axios.post(
+        `${JIRA_BASE_URL}/rest/api/3/issue/${issueKey}/comment`,
+        {
+            body: {
+                type: "doc",
+                version: 1,
+                content
+            }
+        },
+        {
+            auth: { username: JIRA_USER, password: JIRA_TOKEN },
+            headers: { 'Content-Type': 'application/json' }
+        }
+    );
 }
 
 // Fluxo principal
@@ -120,25 +170,37 @@ async function createZephyrTestCase(title, description, folderId) {
         console.error('Passe a chave da issue como argumento. Ex: node scripts/jiraToZephyrWithGemini.js PROJ-123');
         process.exit(1);
     }
-    // Gera o nome da pasta automaticamente
     const folderName = `${ISSUE_KEY} - Test Cases`;
 
     try {
         // Cria a pasta no Zephyr Scale
         const folderId = await createZephyrFolder(folderName);
+
+        // Busca a descrição da issue no Jira
         const description = await getJiraDescription(ISSUE_KEY);
         if (!description) {
             console.error('Descrição não encontrada.');
             return;
         }
+
+        // Gera cenários de teste com Gemini
         const scenarios = await generateTestScenariosGemini(description);
         if (!scenarios.length) {
             console.error('Nenhum cenário gerado pela IA.');
             return;
         }
+
+        // Cria os casos de teste no Zephyr e acumula para comentar no Jira
+        const testCases = [];
         for (const scenario of scenarios) {
-            await createZephyrTestCase(scenario, description, folderId);
+            const testCase = await createZephyrTestCase(scenario, description, folderId);
+            testCases.push({ key: testCase.key, scenario });
         }
+
+        // Adiciona um único comentário na issue do Jira com todos os cenários
+        await addCommentToJiraIssue(ISSUE_KEY, testCases);
+
+        console.log('Comentário adicionado na issue do Jira com todos os cenários.');
     } catch (err) {
         console.error('Erro:', err.response?.data || err.message);
     }
