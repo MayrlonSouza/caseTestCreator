@@ -3,10 +3,13 @@ const axios = require('axios');
 
 const ZEPHYR_TOKEN = process.env.ZEPHYR_TOKEN;
 const ZEPHYR_PROJECT_KEY = process.env.ZEPHYR_PROJECT_KEY;
-const ZEPHYR_BASE_URL = process.env.ZEPHYR_BASE_URL;
+const ZEPHYR_BASE_URL = 'https://api.zephyrscale.smartbear.com/v2';
 
 // Cria uma nova pasta no Zephyr Scale
 async function createZephyrFolder(folderName) {
+    const ZEPHYR_TOKEN = process.env.ZEPHYR_TOKEN;
+    const ZEPHYR_PROJECT_KEY = process.env.ZEPHYR_PROJECT_KEY;
+
     const response = await axios.post(
         `${ZEPHYR_BASE_URL}/folders`,
         {
@@ -26,6 +29,9 @@ async function createZephyrFolder(folderName) {
 
 // Cria um caso de teste no Zephyr Scale
 async function createZephyrTestCase(title, description, folderId) {
+    const ZEPHYR_TOKEN = process.env.ZEPHYR_TOKEN;
+    const ZEPHYR_PROJECT_KEY = process.env.ZEPHYR_PROJECT_KEY;
+
     const response = await axios.post(
         `${ZEPHYR_BASE_URL}/testcases`,
         {

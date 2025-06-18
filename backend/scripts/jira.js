@@ -1,13 +1,14 @@
 require('dotenv').config();
 const axios = require('axios');
 
-const JIRA_USER = process.env.JIRA_USER;
-const JIRA_TOKEN = process.env.JIRA_TOKEN;
-const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
-const ZEPHYR_PROJECT_KEY = process.env.ZEPHYR_PROJECT_KEY;
-
 // Busca a descrição da issue no Jira
 async function getJiraDescription(issueKey) {
+    const JIRA_USER = process.env.JIRA_USER;
+    const JIRA_TOKEN = process.env.JIRA_TOKEN;
+    const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
+
+
+
     const response = await axios.get(
         `${JIRA_BASE_URL}/rest/api/3/issue/${issueKey}`,
         { auth: { username: JIRA_USER, password: JIRA_TOKEN } }
@@ -22,6 +23,12 @@ async function getJiraDescription(issueKey) {
 
 // Adiciona um comentário formatado (ADF) na issue do Jira
 async function addCommentToJiraIssue(issueKey, testCases) {
+    const JIRA_USER = process.env.JIRA_USER;
+    const JIRA_TOKEN = process.env.JIRA_TOKEN;
+    const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
+    const ZEPHYR_PROJECT_KEY = process.env.ZEPHYR_PROJECT_KEY;
+
+
     const content = [
         {
             type: "paragraph",

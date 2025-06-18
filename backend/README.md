@@ -5,11 +5,29 @@ Este projeto automatiza a criação de cenários de teste no Zephyr Scale a part
 ## Estrutura do Projeto
 
 ```
-scripts/
-  app.js                # Fluxo principal da aplicação
-  jira.js               # Funções para integração com o Jira
-  zephyr.js             # Funções para integração com o Zephyr Scale
-  gemini.js             # Função para integração com a IA Gemini
+backend/
+  .env
+  package.json
+  server.js
+  scripts/
+    app.js
+    jira.js
+    zephyr.js
+    gemini.js
+
+frontend/
+  package.json
+  index.html
+  vite.config.js
+  src/
+    App.jsx
+    main.jsx
+    index.css
+    components/
+      ConfigDialog.jsx
+      TestCaseForm.jsx
+    services/
+      api.js
 ```
 
 ## Pré-requisitos
@@ -27,33 +45,54 @@ scripts/
    cd caseTestCreator
    ```
 
-2. Instale as dependências:
+2. Instale as dependências do backend:
    ```sh
+   cd backend
    npm install
    ```
 
-3. Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo (preencha com seus dados):
-
-   ```
-   JIRA_USER=seu_email@dominio.com
-   JIRA_TOKEN=seu_token_jira
-   JIRA_BASE_URL=https://seu-dominio.atlassian.net
-   ZEPHYR_TOKEN=seu_token_zephyr
-   ZEPHYR_PROJECT_KEY=SEU_PROJETO
-   ZEPHYR_BASE_URL=https://api.zephyrscale.smartbear.com/v2
-   GEMINI_API_KEY=sua_api_key_gemini
+3. Instale as dependências do frontend:
+   ```sh
+   cd ../frontend
+   npm install
    ```
 
-## Como executar o script
+## Como rodar o projeto
 
-Execute o script passando apenas a chave da issue do Jira como argumento:
+### 1. Inicie o backend
+
+No diretório `backend`, execute:
 
 ```sh
-node scripts/app.js PROJ-123
+npm start
+```
+ou
+```sh
+node server.js
 ```
 
-- Substitua `PROJ-123` pela chave da história que deseja importar.
-- O script irá:
+O backend ficará disponível em [http://localhost:3001](http://localhost:3001).
+
+### 2. Inicie o frontend
+
+Abra um novo terminal, acesse a pasta `frontend` e rode:
+
+```sh
+npm run dev
+```
+
+O frontend ficará disponível em [http://localhost:5173](http://localhost:5173) (ou a porta exibida no terminal).
+
+### 3. Configuração dos tokens pelo frontend
+
+- Clique no ícone de engrenagem no canto superior direito da interface web.
+- Preencha todos os campos de configuração com seus tokens e URLs.
+- Salve e recarregue a página.
+
+### 4. Utilização
+
+- Informe o ID da task do Jira no campo indicado e clique em "Criar Cenários".
+- O sistema irá:
   1. Buscar a descrição da história no Jira.
   2. Gerar cenários de teste com IA (Gemini).
   3. Criar automaticamente uma nova pasta no Zephyr Scale chamada `PROJ-123 - Test Cases`.

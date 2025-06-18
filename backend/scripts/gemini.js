@@ -1,10 +1,13 @@
 require('dotenv').config();
 const axios = require('axios');
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
 
 // Gera cenários de teste com Gemini
 async function generateTestScenariosGemini(description) {
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+
     const prompt = `
 A partir da seguinte descrição de história de usuário, gere uma lista de cenários de teste claros e objetivos, em português, no formato:
 1. [Título do cenário]
