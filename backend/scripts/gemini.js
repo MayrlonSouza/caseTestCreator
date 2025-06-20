@@ -1,12 +1,9 @@
 require('dotenv').config();
 const axios = require('axios');
-
-
+const env = require('./env');
 
 // Gera cenários de teste com Gemini
 async function generateTestScenariosGemini(description) {
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
 
     const prompt = `
 A partir da seguinte descrição de história de usuário, gere uma lista de cenários de teste claros e objetivos, em português, no formato:
@@ -18,7 +15,7 @@ Descrição:
 ${description}
     `;
     const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`,
         {
             contents: [
                 {

@@ -36,21 +36,22 @@ app.post('/testcases', async (req, res) => {
   const folderName = `${issueKey} - Test Cases`;
 
   try {
-    // 1. Cria a pasta no Zephyr Scale
-    const folderId = await createZephyrFolder(folderName);
-
-    // 2. Busca a descrição da issue no Jira
+    
+    // 1. Busca a descrição da issue no Jira
     const description = await getJiraDescription(issueKey);
     if (!description) {
       return res.status(404).json({ error: 'Descrição não encontrada no Jira.' });
     }
-
-    // 3. Gera cenários de teste com Gemini
+    
+    // 2. Gera cenários de teste com Gemini
     const scenarios = await generateTestScenariosGemini(description);
     if (!scenarios.length) {
       return res.status(500).json({ error: 'Nenhum cenário gerado pela IA.' });
     }
-
+    
+    // 3. Cria a pasta no Zephyr Scale
+    const folderId = await createZephyrFolder(folderName);
+    
     // 4. Cria os casos de teste no Zephyr Scale
     const testCases = [];
     for (const scenario of scenarios) {

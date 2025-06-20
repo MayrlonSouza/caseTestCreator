@@ -1,25 +1,20 @@
 require('dotenv').config();
 const axios = require('axios');
-
-const ZEPHYR_TOKEN = process.env.ZEPHYR_TOKEN;
-const ZEPHYR_PROJECT_KEY = process.env.ZEPHYR_PROJECT_KEY;
-const ZEPHYR_BASE_URL = 'https://api.zephyrscale.smartbear.com/v2';
+const env = require('./env');
 
 // Cria uma nova pasta no Zephyr Scale
 async function createZephyrFolder(folderName) {
-    const ZEPHYR_TOKEN = process.env.ZEPHYR_TOKEN;
-    const ZEPHYR_PROJECT_KEY = process.env.ZEPHYR_PROJECT_KEY;
 
     const response = await axios.post(
-        `${ZEPHYR_BASE_URL}/folders`,
+        `${env.ZEPHYR_BASE_URL}/folders`,
         {
             name: folderName,
-            projectKey: ZEPHYR_PROJECT_KEY,
+            projectKey: env.ZEPHYR_PROJECT_KEY,
             folderType: "TEST_CASE"
         },
         {
             headers: {
-                'Authorization': `Bearer ${ZEPHYR_TOKEN}`,
+                'Authorization': `Bearer ${env.ZEPHYR_TOKEN}`,
                 'Content-Type': 'application/json'
             }
         }
@@ -29,14 +24,12 @@ async function createZephyrFolder(folderName) {
 
 // Cria um caso de teste no Zephyr Scale
 async function createZephyrTestCase(title, description, folderId) {
-    const ZEPHYR_TOKEN = process.env.ZEPHYR_TOKEN;
-    const ZEPHYR_PROJECT_KEY = process.env.ZEPHYR_PROJECT_KEY;
 
     const response = await axios.post(
-        `${ZEPHYR_BASE_URL}/testcases`,
+        `${env.ZEPHYR_BASE_URL}/testcases`,
         {
             name: title,
-            projectKey: ZEPHYR_PROJECT_KEY,
+            projectKey: env.ZEPHYR_PROJECT_KEY,
             objective: description,
             status: "Draft",
             folderId: folderId,
@@ -48,7 +41,7 @@ async function createZephyrTestCase(title, description, folderId) {
         },
         {
             headers: {
-                'Authorization': `Bearer ${ZEPHYR_TOKEN}`,
+                'Authorization': `Bearer ${env.ZEPHYR_TOKEN}`,
                 'Content-Type': 'application/json'
             }
         }
