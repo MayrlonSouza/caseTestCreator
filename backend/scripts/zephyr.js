@@ -23,8 +23,8 @@ async function createZephyrFolder(folderName) {
 }
 
 // Cria um caso de teste no Zephyr Scale
-async function createZephyrTestCase(title, description, folderId) {
-
+async function createZephyrTestCase(title, description, bdd, folderId) {
+    // Cria o caso de teste (sem testScript)
     const response = await axios.post(
         `${env.ZEPHYR_BASE_URL}/testcases`,
         {
@@ -46,8 +46,27 @@ async function createZephyrTestCase(title, description, folderId) {
             }
         }
     );
-    console.log(`Cenário criado: ${response.data.key}`);
-    return response.data;
+    const testCase = response.data;
+
+    // Adiciona o script BDD via POST
+    if (bdd && bdd.trim()) {
+        await axios.post(
+            `${env.ZEPHYR_BASE_URL}/testcases/${testCase.key}/testscript`,
+            {
+                type: "bdd",
+                text: bdd
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${env.ZEPHYR_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+    }
+
+    console.log(`Cenário criado: ${testCase.key}`);
+    return testCase;
 }
 
 module.exports = { createZephyrFolder, createZephyrTestCase };

@@ -33,7 +33,7 @@ async function addCommentToJiraIssue(issueKey, testCases) {
                 { type: "text", text: `${tc.key}: ` },
                 {
                     type: "text",
-                    text: tc.scenario,
+                    text: tc.scenario.title,
                     marks: [
                         { type: "link", attrs: { href: `${env.JIRA_BASE_URL}projects/${env.ZEPHYR_PROJECT_KEY}?selectedItem=com.atlassian.plugins.atlassian-connect-plugin:com.kanoah.test-manager__main-project-page#!/v2/testCase/${tc.key}` } }
                     ]

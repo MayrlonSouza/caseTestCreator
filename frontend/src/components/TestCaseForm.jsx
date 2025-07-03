@@ -66,7 +66,7 @@ export default function TestCaseForm() {
               Resultado:
             </Typography>
             <Paper variant="outlined" sx={{ p: 2, maxHeight: 300, overflow: 'auto', background: '#f5f5f5' }}>
-              <pre style={{ margin: 0, fontSize: 14 }}>
+              <pre style={{ margin: 0, fontSize: 14, whiteSpace: 'pre-wrap' }}>
                 {JSON.stringify(result, null, 2)}
               </pre>
             </Paper>

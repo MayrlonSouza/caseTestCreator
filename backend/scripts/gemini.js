@@ -2,13 +2,27 @@ require('dotenv').config();
 const axios = require('axios');
 const env = require('./env');
 
-// Gera cenários de teste com Gemini
+// Gera cenários de teste com Gemini, incluindo título e descrição
 async function generateTestScenariosGemini(description) {
 
     const prompt = `
-A partir da seguinte descrição de história de usuário, gere uma lista de cenários de teste claros e objetivos, em português, no formato:
-1. [Título do cenário]
-2. [Título do cenário]
+A partir da seguinte descrição de história de usuário, gere uma lista de cenários de teste claros e objetivos, onde o título e a descrição devem ser em português, e o script de teste em inglês, no seguinte formato:
+1. Título: [Título do cenário]
+   Descrição: [Descrição detalhada do cenário]
+   Script de Teste (BDD):
+   """
+   Given ...
+   When ...
+   Then ...
+   """
+2. Título: [Título do cenário]
+   Descrição: [Descrição detalhada do cenário]
+   Script de Teste (BDD):
+   """
+   Given ...
+   When ...
+   Then ...
+   """
 ...
 
 Descrição:
@@ -31,15 +45,15 @@ ${description}
             }
         }
     );
-    // Extrai os títulos dos cenários da resposta
+    // Extrai os títulos, descrições e scripts BDD dos cenários da resposta
     const text = response.data.candidates[0].content.parts[0].text;
-    return text.match(/^\d+\.\s*(.+)$/gm)
-        ?.map(line => {
-            // Remove "**" do início, pega só até ":" ou "–" ou "-" ou "**"
-            let clean = line.replace(/^\d+\.\s*/, '').replace(/^\*+\s*/, '');
-            const match = clean.match(/^(.+?)(:|–|-|\*\*)/);
-            return match ? match[1].trim() : clean.trim();
-        }) || [];
+    // Regex para capturar: número, título, descrição e script BDD
+    const matches = [...text.matchAll(/^\d+\.\s*Título:\s*(.+)\n\s*Descrição:\s*([^\n]+)\n\s*Script de Teste \(BDD\):\s*"""([\s\S]*?)"""/gm)];
+    return matches.map(m => ({
+        title: m[1].trim(),
+        description: m[2].trim(),
+        bdd: m[3].trim()
+    }));
 }
 
 module.exports = { generateTestScenariosGemini };

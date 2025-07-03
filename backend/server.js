@@ -28,11 +28,6 @@ app.post('/testcases', async (req, res) => {
   // Aplica os tokens enviados pelo frontend
   applyTokens(tokens);
 
-    // Validação dos tokens obrigatórios
-  if (!process.env.ZEPHYR_TOKEN) {
-    return res.status(400).json({ error: 'Token do Zephyr não informado.' });
-  }
-
   const folderName = `${issueKey} - Test Cases`;
 
   try {
@@ -55,7 +50,7 @@ app.post('/testcases', async (req, res) => {
     // 4. Cria os casos de teste no Zephyr Scale
     const testCases = [];
     for (const scenario of scenarios) {
-      const testCase = await createZephyrTestCase(scenario, description, folderId);
+      const testCase = await createZephyrTestCase(scenario.title, scenario.description, scenario.bdd, folderId);
       testCases.push({ key: testCase.key, scenario });
     }
 
