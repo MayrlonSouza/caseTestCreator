@@ -6,7 +6,7 @@ const env = require('./env');
 async function generateTestScenariosGemini(description) {
 
     const prompt = `
-A partir da seguinte descrição de história de usuário, gere uma lista de cenários de teste claros e objetivos, onde o título e a descrição devem ser em português, e o script de teste em inglês, no seguinte formato:
+A partir da seguinte descrição de história de usuário, gere uma lista de cenários de teste claros e objetivos, onde o título e a descrição e o script de teste devem ser em português, e os verbos do BDD em inglês, no seguinte formato:
 1. Título: [Título do cenário]
    Descrição: [Descrição detalhada do cenário]
    Script de Teste (BDD):
