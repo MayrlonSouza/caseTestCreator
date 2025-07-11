@@ -56,4 +56,41 @@ ${description}
     }));
 }
 
-module.exports = { generateTestScenariosGemini };
+// Gera um modelo ideal de User Story a partir de uma descrição
+async function generateUserStoryGemini(description) {
+    const prompt = `
+Transforme a descrição abaixo em uma user story ideal, seguindo exatamente o formato:
+
+Como [tipo de usuário], eu quero [funcionalidade/objetivo], para que [benefício].
+
+Critérios de Aceite:
+- [Critério 1]
+- [Critério 2]
+- [Critério 3]
+
+Apenas retorne a user story e os critérios de aceite, sem qualquer introdução, explicação ou formatação adicional.
+
+Descrição:
+${description}
+`;
+    const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+        {
+            contents: [
+                {
+                    parts: [
+                        { text: prompt }
+                    ]
+                }
+            ]
+        },
+        {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+    return response.data.candidates[0].content.parts[0].text.trim();
+}
+
+module.exports = { generateTestScenariosGemini, generateUserStoryGemini };

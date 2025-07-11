@@ -1,9 +1,11 @@
 require('dotenv').config();
+const env = require('./scripts/env');
 const express = require('express');
 const cors = require('cors');
-const { getJiraDescription, addCommentToJiraIssue } = require('./scripts/jira');
+const axios = require('axios');
+const { getJiraDescription, addCommentToJiraIssue, updateJiraDescription } = require('./scripts/jira');
 const { createZephyrFolder, createZephyrTestCase } = require('./scripts/zephyr');
-const { generateTestScenariosGemini } = require('./scripts/gemini');
+const { generateTestScenariosGemini, generateUserStoryGemini } = require('./scripts/gemini');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -61,6 +63,22 @@ app.post('/testcases', async (req, res) => {
       message: 'Cenários criados e comentário adicionado no Jira.',
       testCases,
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.response?.data || err.message });
+  }
+});
+
+app.post('/userstory', async (req, res) => {
+  const { issueKey, description, tokens } = req.body;
+  if (!issueKey || !description) {
+    return res.status(400).json({ error: 'issueKey e description são obrigatórios' });
+  }
+  applyTokens(tokens);
+  try {
+    const userStory = await generateUserStoryGemini(description);
+    await updateJiraDescription(issueKey, userStory);
+    res.json({ message: 'User Story gerada e aplicada na issue!', userStory });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.response?.data || err.message });

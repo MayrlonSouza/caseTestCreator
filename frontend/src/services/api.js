@@ -19,3 +19,9 @@ export const createTestCases = async (issueKey) => {
   const response = await axios.post(`${API_BASE_URL}/testcases`, { issueKey, tokens });
   return response.data;
 };
+
+export const generateAndApplyUserStory = async (issueKey, description) => {
+  const tokens = getCustomTokens();
+  const response = await axios.post('http://localhost:3001/userstory', { issueKey, description, tokens });
+  return response.data;
+};

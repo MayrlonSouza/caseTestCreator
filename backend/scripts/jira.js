@@ -58,4 +58,50 @@ async function addCommentToJiraIssue(issueKey, testCases) {
     );
 }
 
-module.exports = { getJiraDescription, addCommentToJiraIssue };
+// Atualiza a descrição da issue no Jira usando ADF
+async function updateJiraDescription(issueKey, userStoryText) {
+    // Separa a user story dos critérios de aceite
+    const lines = userStoryText.split('\n').map(l => l.trim()).filter(Boolean);
+    const userStoryLine = lines[0] || '';
+    const criteriaStart = lines.findIndex(line => line.toLowerCase().includes('critério'));
+    const criteriaLines = criteriaStart >= 0 ? lines.slice(criteriaStart + 1) : [];
+    const criteria = criteriaLines
+        .map(line => line.replace(/^[-–•]\s*/, '').trim())
+        .filter(Boolean);
+
+    // Monta o ADF
+    const adfContent = {
+        type: "doc",
+        version: 1,
+        content: [
+            {
+                type: "paragraph",
+                content: [{ type: "text", text: userStoryLine }]
+            },
+            {
+                type: "heading",
+                attrs: { level: 2 },
+                content: [{ type: "text", text: "Critérios de Aceite" }]
+            },
+            ...criteria.map(crit => ({
+                type: "paragraph",
+                content: [{ type: "text", text: crit }]
+            }))
+        ]
+    };
+
+    await axios.put(
+        `${env.JIRA_BASE_URL}/rest/api/3/issue/${issueKey}`,
+        {
+            fields: {
+                description: adfContent
+            }
+        },
+        {
+            auth: { username: env.JIRA_USER, password: env.JIRA_TOKEN },
+            headers: { 'Content-Type': 'application/json' }
+        }
+    );
+}
+
+module.exports = { getJiraDescription, addCommentToJiraIssue, updateJiraDescription };
