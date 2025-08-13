@@ -69,22 +69,6 @@ app.post('/testcases', async (req, res) => {
   }
 });
 
-app.post('/userstory', async (req, res) => {
-  const { issueKey, description, tokens } = req.body;
-  if (!issueKey || !description) {
-    return res.status(400).json({ error: 'issueKey e description são obrigatórios' });
-  }
-  applyTokens(tokens);
-  try {
-    const userStory = await generateUserStoryGemini(description);
-    await updateJiraDescription(issueKey, userStory);
-    res.json({ message: 'User Story gerada e aplicada na issue!', userStory });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.response?.data || err.message });
-  }
-});
-
 app.listen(PORT, () => {
   console.log(`Backend rodando em http://localhost:${PORT}`);
 });
