@@ -12,27 +12,32 @@ const folderName = `${ISSUE_KEY} - Test Cases`;
     }
 
     try {
-        // 1. Cria a pasta no Zephyr Scale
-        const folderId = await createZephyrFolder(folderName);
-
-        // 2. Busca a descrição da issue no Jira
+        // 1. Busca a descrição da issue no Jira
         const description = await getJiraDescription(ISSUE_KEY);
         if (!description) {
             console.error('Descrição não encontrada.');
             return;
         }
 
-        // 3. Gera cenários de teste com Gemini
+        // 2. Gera cenários de teste com Gemini
         const scenarios = await generateTestScenariosGemini(description);
         if (!scenarios.length) {
             console.error('Nenhum cenário gerado pela IA.');
             return;
         }
 
+        // 3. Cria a pasta no Zephyr Scale
+        const folderId = await createZephyrFolder(folderName);
+
         // 4. Cria os casos de teste no Zephyr Scale e acumula para comentar no Jira
         const testCases = [];
         for (const scenario of scenarios) {
-            const testCase = await createZephyrTestCase(scenario, description, folderId);
+            const testCase = await createZephyrTestCase(
+                scenario.title,
+                scenario.description,
+                scenario.bdd,
+                folderId
+            );
             testCases.push({ key: testCase.key, scenario });
         }
 

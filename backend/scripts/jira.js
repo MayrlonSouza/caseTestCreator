@@ -1,16 +1,13 @@
 require('dotenv').config();
 const axios = require('axios');
-
-const JIRA_USER = process.env.JIRA_USER;
-const JIRA_TOKEN = process.env.JIRA_TOKEN;
-const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
-const ZEPHYR_PROJECT_KEY = process.env.ZEPHYR_PROJECT_KEY;
+const env = require('./env');
 
 // Busca a descrição da issue no Jira
 async function getJiraDescription(issueKey) {
+
     const response = await axios.get(
-        `${JIRA_BASE_URL}/rest/api/3/issue/${issueKey}`,
-        { auth: { username: JIRA_USER, password: JIRA_TOKEN } }
+        `${env.JIRA_BASE_URL}/rest/api/3/issue/${issueKey}`,
+        { auth: { username: env.JIRA_USER, password: env.JIRA_TOKEN } }
     );
     // Ajuste conforme o formato do seu Jira
     const descField = response.data.fields.description;
@@ -22,6 +19,7 @@ async function getJiraDescription(issueKey) {
 
 // Adiciona um comentário formatado (ADF) na issue do Jira
 async function addCommentToJiraIssue(issueKey, testCases) {
+
     const content = [
         {
             type: "paragraph",
@@ -35,9 +33,9 @@ async function addCommentToJiraIssue(issueKey, testCases) {
                 { type: "text", text: `${tc.key}: ` },
                 {
                     type: "text",
-                    text: tc.scenario,
+                    text: tc.scenario.title,
                     marks: [
-                        { type: "link", attrs: { href: `${JIRA_BASE_URL}projects/${ZEPHYR_PROJECT_KEY}?selectedItem=com.atlassian.plugins.atlassian-connect-plugin:com.kanoah.test-manager__main-project-page#!/v2/testCase/${tc.key}` } }
+                        { type: "link", attrs: { href: `${env.JIRA_BASE_URL}projects/${env.ZEPHYR_PROJECT_KEY}?selectedItem=com.atlassian.plugins.atlassian-connect-plugin:com.kanoah.test-manager__main-project-page#!/v2/testCase/${tc.key}` } }
                     ]
                 }
             ]
@@ -45,7 +43,7 @@ async function addCommentToJiraIssue(issueKey, testCases) {
     ];
 
     await axios.post(
-        `${JIRA_BASE_URL}/rest/api/3/issue/${issueKey}/comment`,
+        `${env.JIRA_BASE_URL}/rest/api/3/issue/${issueKey}/comment`,
         {
             body: {
                 type: "doc",
@@ -54,7 +52,7 @@ async function addCommentToJiraIssue(issueKey, testCases) {
             }
         },
         {
-            auth: { username: JIRA_USER, password: JIRA_TOKEN },
+            auth: { username: env.JIRA_USER, password: env.JIRA_TOKEN },
             headers: { 'Content-Type': 'application/json' }
         }
     );
