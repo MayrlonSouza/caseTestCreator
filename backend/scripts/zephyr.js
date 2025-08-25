@@ -34,9 +34,7 @@ async function createZephyrTestCase(title, description, bdd, folderId) {
             status: "Draft",
             folderId: folderId,
             customFields: {
-                "Might be automated": "Yes",
-                "Product": "Issuing",
-                "Time": "Dock"
+                "Might be automated": "Yes"
             }
         },
         {
