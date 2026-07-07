@@ -5,7 +5,7 @@ function App() {
   return (
     <div style={{ position: 'right', minHeight: '100vh' }}>
       <ConfigDialog />
-      <h1>Gerador de Cenários de Teste</h1>
+      <h1>Gerador de Tasks e Casos de Teste</h1>
       <TestCaseForm />
     </div>
   );

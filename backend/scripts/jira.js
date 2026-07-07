@@ -2,28 +2,41 @@ require('dotenv').config();
 const axios = require('axios');
 const env = require('./env');
 
-// Função recursiva para extrair texto de qualquer nível do ADF do Jira
-function extractTextFromADF(node) {
-    if (!node) return '';
-    if (typeof node === 'string') return node; // Fallback para Jira Server
-    if (node.type === 'text') return node.text || '';
-    if (node.content && Array.isArray(node.content)) {
-        return node.content.map(extractTextFromADF).join(' ');
-    }
-    return '';
-}
-
-// Busca a descrição da issue no Jira
+// Busca a descrição da issue no Jira (usada para ler tasks existentes)
 async function getJiraDescription(issueKey) {
     const response = await axios.get(
         `${env.JIRA_BASE_URL}/rest/api/3/issue/${issueKey}`,
         { auth: { username: env.JIRA_USER, password: env.JIRA_TOKEN } }
     );
-    
     const descField = response.data.fields.description;
-    if (!descField) return '';
+    if (!descField || !descField.content) return '';
+    return descField.content
+        .map(c => c.content?.map(cc => cc.text).join('') || '')
+        .join('\n');
+}
+
+// NOVA FUNÇÃO ATUALIZADA: Cria uma nova issue no Jira usando a API v2 (suporta Jira Markup)
+async function createJiraIssue(summary, description, projectKey, issueTypeName) {
+    // Usando a API v2, o Jira aceita a string bruta e formata automaticamente 
+    // os marcadores (como h1., *negrito* e {code})
+    const response = await axios.post(
+        `${env.JIRA_BASE_URL}/rest/api/2/issue`,
+        {
+            fields: {
+                project: { key: projectKey },
+                summary: summary,
+                description: description, // Passamos a string diretamente
+                issuetype: { name: issueTypeName }
+            }
+        },
+        {
+            auth: { username: env.JIRA_USER, password: env.JIRA_TOKEN },
+            headers: { 'Content-Type': 'application/json' }
+        }
+    );
     
-    return extractTextFromADF(descField).trim();
+    // Retorna a chave da issue criada (Ex: PROJ-124)
+    return response.data.key;
 }
 
 // Adiciona um comentário formatado (ADF) na issue do Jira
@@ -43,7 +56,7 @@ async function addCommentToJiraIssue(issueKey, testCases) {
                     type: "text",
                     text: tc.scenario.title,
                     marks: [
-                        { type: "link", attrs: { href: `${env.JIRA_BASE_URL}/projects/${env.ZEPHYR_PROJECT_KEY}?selectedItem=com.atlassian.plugins.atlassian-connect-plugin:com.kanoah.test-manager__main-project-page#!/v2/testCase/${tc.key}` } }
+                        { type: "link", attrs: { href: `${env.JIRA_BASE_URL}projects/${env.ZEPHYR_PROJECT_KEY}?selectedItem=com.atlassian.plugins.atlassian-connect-plugin:com.kanoah.test-manager__main-project-page#!/v2/testCase/${tc.key}` } }
                     ]
                 }
             ]
@@ -66,4 +79,4 @@ async function addCommentToJiraIssue(issueKey, testCases) {
     );
 }
 
-module.exports = { getJiraDescription, addCommentToJiraIssue };
+module.exports = { getJiraDescription, addCommentToJiraIssue, createJiraIssue };

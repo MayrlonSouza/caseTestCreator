@@ -14,8 +14,8 @@ function getCustomTokens() {
   };
 }
 
-export const createTestCases = async (issueKey) => {
+export const createTestCases = async (payload) => {
   const tokens = getCustomTokens();
-  const response = await axios.post(`${API_BASE_URL}/testcases`, { issueKey, tokens });
+  const response = await axios.post(`${API_BASE_URL}/testcases`, { ...payload, tokens });
   return response.data;
 };
