@@ -13,6 +13,7 @@ export default function TestCaseForm() {
   const [taskTitle, setTaskTitle] = useState('');
   const [taskText, setTaskText] = useState('');
   const [taskType, setTaskType] = useState('Backend');
+  const [parentKey, setParentKey] = useState(''); 
   
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,7 @@ export default function TestCaseForm() {
     
     try {
       const payload = action === 'create' 
-        ? { action, taskTitle, taskText, taskType } 
+        ? { action, taskTitle, taskText, taskType, parentKey } 
         : { action, issueKey };
 
       const data = await createTestCases(payload);
@@ -75,18 +76,28 @@ export default function TestCaseForm() {
                 fullWidth
               />
 
-              <FormControl fullWidth>
-                <InputLabel>Tipo de Funcionalidade</InputLabel>
-                <Select
-                  value={taskType}
-                  label="Tipo de Funcionalidade"
-                  onChange={e => setTaskType(e.target.value)}
-                >
-                  <MenuItem value="Backend">História de Backend</MenuItem>
-                  <MenuItem value="Frontend">História de Frontend</MenuItem>
-                  <MenuItem value="Épico">Épico</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Tipo de Funcionalidade</InputLabel>
+                  <Select
+                    value={taskType}
+                    label="Tipo de Funcionalidade"
+                    onChange={e => setTaskType(e.target.value)}
+                  >
+                    <MenuItem value="Backend">História de Backend</MenuItem>
+                    <MenuItem value="Frontend">História de Frontend</MenuItem>
+                    <MenuItem value="Épico">Épico</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  label="Task Pai (Opcional)"
+                  placeholder="Ex: PROJ-10 (Épico ou Iniciativa)"
+                  value={parentKey}
+                  onChange={e => setParentKey(e.target.value)}
+                  fullWidth
+                />
+              </Box>
 
               <TextField
                 label="Rascunho / Contexto da Tarefa"
@@ -119,9 +130,17 @@ export default function TestCaseForm() {
             disabled={loading}
             sx={{ mt: 3, height: 48 }}
           >
-            {loading ? <CircularProgress size={24} /> : (action === 'create' ? 'Criar Task e Testes' : 'Gerar Testes')}
+            {loading ? <CircularProgress size={24} color="inherit" /> : (action === 'create' ? 'Criar Task e Testes' : 'Gerar Testes')}
           </Button>
         </form>
+
+        {/* MENSAGEM DE FEEDBACK ENQUANTO CARREGA */}
+        {loading && (
+          <Alert severity="info" sx={{ mt: 3 }}>
+            <strong>Processando a sua requisição...</strong><br/>
+            Como estamos gerando conteúdo com IA e sincronizando com o Jira e o Zephyr, esse processo pode levar alguns minutos. Por favor, não feche a tela.
+          </Alert>
+        )}
 
         {error && (
           <Alert severity="error" sx={{ mt: 3 }}>
@@ -129,7 +148,7 @@ export default function TestCaseForm() {
           </Alert>
         )}
 
-        {result && (
+        {result && !loading && (
           <Box sx={{ mt: 3 }}>
             <Alert 
               severity={result.partialSuccess ? "warning" : "success"} 

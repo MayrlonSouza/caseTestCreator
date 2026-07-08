@@ -20,7 +20,8 @@ function applyTokens(tokens) {
 }
 
 app.post('/testcases', async (req, res) => {
-  const { action, issueKey, taskTitle, taskText, taskType, tokens } = req.body;
+  // Extraindo o novo campo parentKey
+  const { action, issueKey, taskTitle, taskText, taskType, parentKey, tokens } = req.body;
 
   applyTokens(tokens);
 
@@ -29,7 +30,6 @@ app.post('/testcases', async (req, res) => {
     let finalDescription = "";
     let isNewTask = false;
 
-    // 1. Criar uma NOVA task ou buscar uma existente
     if (action === 'create') {
       if (!taskTitle || !taskText) {
         return res.status(400).json({ error: 'Título e rascunho/contexto são obrigatórios para criar uma nova task.' });
@@ -38,7 +38,8 @@ app.post('/testcases', async (req, res) => {
       finalDescription = await formatTaskDescriptionGemini(taskText, taskType);
       const issueTypeName = taskType === 'Épico' ? 'Epic' : 'Story';
       
-      finalIssueKey = await createJiraIssue(taskTitle, finalDescription, process.env.ZEPHYR_PROJECT_KEY, issueTypeName);
+      // Repassando o parentKey para a função do Jira
+      finalIssueKey = await createJiraIssue(taskTitle, finalDescription, process.env.ZEPHYR_PROJECT_KEY, issueTypeName, parentKey);
       isNewTask = true;
       console.log(`Task criada com sucesso no Jira: ${finalIssueKey}`);
       
@@ -54,13 +55,12 @@ app.post('/testcases', async (req, res) => {
 
     if (taskType === 'Épico') {
       return res.json({
-        message: `Épico ${finalIssueKey} criado com sucesso no Jira! (A geração de cenários de teste não é necessária para Épicos).`,
+        message: `Épico ${finalIssueKey} criado com sucesso no Jira! (A geração de cenários de teste é ignorada para Épicos).`,
         issueKey: finalIssueKey,
         testCases: []
       });
     }
     
-    // 2. ISOLANDO A GERAÇÃO DE TESTES PARA NÃO PERDER A TASK CRIADA
     let scenarios = [];
     try {
       scenarios = await generateTestScenariosGemini(finalDescription);
@@ -70,21 +70,18 @@ app.post('/testcases', async (req, res) => {
     } catch (aiError) {
       console.error("⚠️ Erro na IA ao tentar gerar cenários:", aiError.message);
       
-      // Se era uma task nova, avisamos o frontend que a task FOI CRIADA, mas a IA falhou.
       if (isNewTask) {
         return res.json({
-          partialSuccess: true, // Flag para o Frontend exibir alerta amarelo
+          partialSuccess: true,
           message: `ATENÇÃO: A Task ${finalIssueKey} FOI CRIADA com sucesso no seu Jira! Porém, os servidores do Google falharam ao gerar os cenários de teste. Você pode usar a opção "Gerar Testes para Task Existente" depois.`,
           issueKey: finalIssueKey,
           testCases: []
         });
       } else {
-        // Se já era task existente, joga o erro normal.
         throw aiError;
       }
     }
 
-    // 3. Zephyr Scale
     const folderName = `${finalIssueKey} - Test Cases`;
     const folderId = await createZephyrFolder(folderName);
     
@@ -94,7 +91,6 @@ app.post('/testcases', async (req, res) => {
       testCases.push({ key: testCase.key, scenario });
     }
 
-    // 4. Jira Comment
     await addCommentToJiraIssue(finalIssueKey, testCases);
 
     res.json({

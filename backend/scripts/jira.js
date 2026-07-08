@@ -15,27 +15,29 @@ async function getJiraDescription(issueKey) {
         .join('\n');
 }
 
-// NOVA FUNÇÃO ATUALIZADA: Cria uma nova issue no Jira usando a API v2 (suporta Jira Markup)
-async function createJiraIssue(summary, description, projectKey, issueTypeName) {
-    // Usando a API v2, o Jira aceita a string bruta e formata automaticamente 
-    // os marcadores (como h1., *negrito* e {code})
+// NOVA FUNÇÃO ATUALIZADA: Cria uma nova issue no Jira aceitando uma Task Pai
+async function createJiraIssue(summary, description, projectKey, issueTypeName, parentKey) {
+    const fields = {
+        project: { key: projectKey },
+        summary: summary,
+        description: description,
+        issuetype: { name: issueTypeName }
+    };
+
+    // Se o usuário informou uma task pai (Epic ou Iniciativa), adiciona ao payload
+    if (parentKey && parentKey.trim() !== '') {
+        fields.parent = { key: parentKey.trim() };
+    }
+
     const response = await axios.post(
         `${env.JIRA_BASE_URL}/rest/api/2/issue`,
-        {
-            fields: {
-                project: { key: projectKey },
-                summary: summary,
-                description: description, // Passamos a string diretamente
-                issuetype: { name: issueTypeName }
-            }
-        },
+        { fields },
         {
             auth: { username: env.JIRA_USER, password: env.JIRA_TOKEN },
             headers: { 'Content-Type': 'application/json' }
         }
     );
     
-    // Retorna a chave da issue criada (Ex: PROJ-124)
     return response.data.key;
 }
 
